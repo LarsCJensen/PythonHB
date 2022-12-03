@@ -91,7 +91,6 @@ while True:
     except ValueError:
         continue
 
-months = ["Januari"]
 years = get_years(kpiData[1:])
 yearly_means = calculate_and_get_yearly_kpi_means()
 monthly_kpis = get_kpis_for_month(month)
@@ -103,10 +102,10 @@ plt.plot(
 )
 plt.title("Konsumentprisindex År 1980-2022")
 plt.xlabel("År")
+plt.ylabel("KPI")
 # Här sätter jag startvärden för x- och y-axeln
 plt.xlim([1980, 2022])
 plt.ylim([100, 400])
-plt.ylabel("KPI")
 plt.grid()
 plt.legend()
 plt.show()
@@ -123,12 +122,14 @@ def plot_data(list_of_data):
     if "livsmedel" in list_of_data[1][0]:
         plt.ylim([100, 1000])
         plt.title(
-            f"Prisutveckling for olika kategorier av varor och tjänster År {years[0]}-{years[len(years)-1]}"
+            f"Prisutveckling for olika kategorier av varor och tjänster \
+                 År {years[0]}-{years[len(years)-1]}"
         )
     else:
         plt.ylim([100, 500])
         plt.title(
-            f"Prisutveckling for olika livsmedel År {years[0]}-{years[len(years)-1]}"
+            f"Prisutveckling for olika livsmedel År \
+                {years[0]}-{years[len(years)-1]}"
         )
     i = 0
     for row in list_of_data[1:]:
@@ -220,29 +221,36 @@ print_price_over_time(tjansteData)
 plot_price_over_time()
 
 # Uppgift 5
-# Gå över kpidata, beräkna månad med störst KPI-förändring
-# År | KPI-förändring i % | Månad | Årsmedel
 
 # Hjälpmetod för att beräkna kpi-skillnader mellan månader
 def _get_KPI_diff_for_months(month1, month2):
-    return (month2 - month1) / month1
+    return (month1 - month2) / month2
 
 
 # Hjälpmetod för att beräkna kpi-skillnader för ett givet år
-def _get_biggest_KPI_diff_for_year_index(yearly_kpis):
+def _get_biggest_KPI_diff_and_index_for_year(yearly_kpis):
     kpi_diffs = []
     i = 0
     for kpi in yearly_kpis:
-        # Vi skickar in nästa värde för att beräkna mot värdet innan
-        kpi_diff = _get_KPI_diff_for_months(float(yearly_kpis[i + 1]), float(kpi))
+        # Om i är 0 betyder det att vi är på första månaden och ska hoppa till nästa
+        if i == 0:
+            i += 1
+            continue
+        # Vi skickar in förra värdet för att beräkna mot månadens värde
+        kpi_diff = _get_KPI_diff_for_months(float(kpi), float(yearly_kpis[i - 1]))
         # Vi sparar skillnaden som absolut värde för att kunna beräkna största skillnaden
-        kpi_diffs.append(abs(kpi_diff))
+        kpi_diffs.append(kpi_diff)
         i += 1
-        # Om i är lika stort som längden på listan-1 (sista månaden) finns inga fler månader att beräkna
-        if i == len(yearly_kpis) - 1:
+        # Om i är lika stort som längden på listan (sista månaden) finns inga fler månader att beräkna
+        if i == len(yearly_kpis):
             break
-    # Vi returnerar indexet av det värde som är störst
-    return kpi_diffs.index(max(kpi_diffs))
+
+    # Här tar vi reda på vilken skillnad som är störst mellan minsta och största värde
+    biggest_diff = (
+        max(kpi_diffs) if abs(max(kpi_diffs)) >= abs(min(kpi_diffs)) else min(kpi_diffs)
+    )
+    # Vi returnerar den största skillanden samt indexet av det värde som är störst
+    return biggest_diff, kpi_diffs.index(biggest_diff)
 
 
 # Metod för att beräkna årliga KPI-skillnader för kpiData
@@ -250,14 +258,18 @@ def get_yearly_kpi_diffs():
     yearly_kpi_diffs = []
     yearly_kpis = []
     dec_value = None
-    # Vi vill beräkna från 2000 - 2022
+    biggest_diff_all_time = 0
+    biggest_diff_year = ""
+    biggest_diff_month = ""
+    # Vi vill beräkna från 2000 - 2022 så vänder på listan och skippar första raden
     kpi_data_reversed = kpiData[1:]
     kpi_data_reversed.reverse()
     # Vi återanvänder metoden för att räkna ut yearly means
     yearly_means = calculate_and_get_yearly_kpi_means()
+    # Vi tar ut listan med månader och skippar första kolumnen som innehåller "År"
+    months = kpiData[0][1:]
     # Vi använder den här variabeln för att ta fram det årliga medelvärdet
     i = 0
-    # Vi skippar första raden som innehåller rubriker
     for yearly_kpi in kpi_data_reversed:
         # Initierar tom dict att fylla med år och kpi-skillnad
         yearly_kpi_diff = {}
@@ -267,24 +279,42 @@ def get_yearly_kpi_diffs():
             yearly_kpis.insert(0, dec_value)
 
         # Vi hämtar ut indexet i listan som har störst skillnad
-        biggest_diff_index = _get_biggest_KPI_diff_for_year_index(yearly_kpis)
+        biggest_diff, biggest_diff_index = _get_biggest_KPI_diff_and_index_for_year(
+            yearly_kpis
+        )
         # Vi räknar ut för vilken månad som maxvärdet finns
-        # Om decembervärdet är insertat måste vi ta hänsyn till det
         if dec_value:
-            month = kpiData[0][biggest_diff_index + 1]
+            # Om decembervärdet är insertat måste vi ta hänsyn till det
+            month = months[biggest_diff_index]
         else:
-            month = kpiData[0][biggest_diff_index]
-        # Sätter nyckeln till året och värdet till en dict med år och max-värdet av beräkningen
-        yearly_kpi_diff[yearly_kpi[0]] = {
-            month: yearly_kpis[biggest_diff_index],
-            "yearly_mean": yearly_means[i],
+            # Eftersom värden beräknas från februari adderar vi 1 månad
+            month = months[biggest_diff_index + 1]
+
+        if biggest_diff > biggest_diff_all_time:
+            biggest_diff_all_time = biggest_diff
+            biggest_diff_year = yearly_kpi[0]
+            biggest_diff_month = month
+        # Skapar en dict med de värden jag vill presentera i printen
+        yearly_kpi_diff = {
+            "year": yearly_kpi[0],
+            "month": month,
+            "biggest_diff": f"{biggest_diff:.2f}",
+            "yearly_mean": f"{yearly_means[i]:.2f}",
         }
         yearly_kpi_diffs.append(yearly_kpi_diff)
         # Om året innehåller tolv månaders KPI sparar vi sista(dec) värdet
         if len(yearly_kpi[1:]) == 12:
             dec_value = yearly_kpis[len(yearly_kpis) - 1]
         i += 1
-
+    yearly_kpi_diffs.append(
+        {
+            "all_time": {
+                "diff": biggest_diff_all_time,
+                "biggest_diff_year": biggest_diff_year,
+                "biggest_diff_month": biggest_diff_month,
+            }
+        }
+    )
     return yearly_kpi_diffs
 
 
@@ -293,14 +323,60 @@ def print_yearly_kpi_changes(yearly_kpi_diffs):
     print("================================================================")
     title = "ANALYS AV KPI UNDER ÅREN 2000 - 2022"
     # Börja skriv ut titeln 100 tecken in
-    print(f"{title:^100}")
+    print(f"{title:^75}")
     sub_title = "Största förändring"
-    print(f"{sub_title:^100}")
+    print(f"{sub_title:^75}")
 
-    print(f"{'År':<15}{'%':<10}{'Månad':<15}{'Årsmedelvärde':<15}")
-    for year in yearly_kpi_diffs:
-        print(f"|{year[0]:<40}|{year:<15.2f}")
+    print(f"{'År':<25}{'%':<15}{'Månad':<15}{'Årsmedelvärde':<15}")
+    print("---------------------------------------------------------------")
+    i = 0
+    for item in yearly_kpi_diffs:
+        if i < len(yearly_kpi_diffs) - 1:
+            # För att göra koden mer lättläst skapar jag variabler av värden
+            year = item["year"]
+            biggest_diff = item["biggest_diff"]
+            month = item["month"]
+            yearly_mean = item["yearly_mean"]
+            print(f"{year:<25}{biggest_diff:<15}{month:<15}{yearly_mean:<15}")
+        else:
+            # För att göra koden mer lättläst skapar jag variabler av värden
+            biggest_diff = item["all_time"]["diff"]
+            biggest_diff_month = item["all_time"]["biggest_diff_month"]
+            biggest_diff_year = item["all_time"]["biggest_diff_year"]
+            # Vi skriver ut en tom rad
+            print("\n")
+            print(
+                f"{'Största förändring:':<25}{biggest_diff:<10.2f} \
+                    {biggest_diff_month} {biggest_diff_year}"
+            )
+        i += 1
+
+    print("================================================================")
+
+
+def plot_yearly_kpi_changes(yearly_kpi_diffs):
+    plt.title(
+        f"Största förändring av KPI för en enskild månad under åren  \
+            {kpiData[len(kpiData)-1][0]}-{kpiData[1][0]}"
+    )
+    plt.xlabel("Månad")
+    plt.ylabel("År")
+    plt.xlim([1, 12])
+    plt.ylim([1980, 2022])
+
+    plt.grid()
+    years = []
+    months = []
+    # Vi vill bara ha datat för åren, inte största skillnaden
+    for item in yearly_kpi_diffs[:-1]:
+        years.append(int(item["year"]))
+        # Vi måste ta fram en int-representation av månaden för att kunna plotta
+        months.append(kpiData[0][1:].index(item["month"]) + 1)
+    plt.scatter(years, months)
+    plt.show()
 
 
 yearly_kpi_diffs = get_yearly_kpi_diffs()
 print_yearly_kpi_changes(yearly_kpi_diffs)
+plot_yearly_kpi_changes(yearly_kpi_diffs)
+print("att")
