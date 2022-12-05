@@ -24,7 +24,7 @@ def _read_file(file_name):
 
 
 def read_data_files(kpi_file, livsmedel_file, tjanstedata_file):
-    # Jag sätter variablerna till globala så att vi kan använda dem i nästkommande funktioner
+    # Jag sätter variablerna till globala så att vi kan använda dem i efterkommmande funktioner
     global kpiData
     kpiData = _read_file(kpi_file)
     global livsmedelData
@@ -32,17 +32,26 @@ def read_data_files(kpi_file, livsmedel_file, tjanstedata_file):
     global tjansteData
     tjansteData = _read_file(tjanstedata_file)
 
+    # Skriv ut de första tre raderna i varje fil
     print(kpiData[:3])
-    print("------")
+    print("--------------")
     print(tjansteData[:3])
-    print("------")
+    print("--------------")
     print(livsmedelData[:3])
 
 
-read_data_files("data/kpi-1.csv", "data/livsmedel-1.csv", "data/tjänster-1.csv")
+read_data_files("kpi-1.csv", "livsmedel-1.csv", "tjänster-1.csv")
 
 # Uppgift 2
 import matplotlib.pyplot as plt
+
+
+# Hjälpmetod för att räkna ut medelvärde för år
+def _calculate_mean_for_year(year):
+    # Första kolumnen innehåller året, så den tar vi bort när vi räknar på medelvärdet
+    # Jag använder mig av list comprehension för att göra om värden till float innan
+    # beräkning av medelvärdet
+    return sum([float(value) for value in year[1:]]) / (len(year) - 1)
 
 
 def calculate_and_get_yearly_kpi_means(kpi_list):
@@ -52,21 +61,6 @@ def calculate_and_get_yearly_kpi_means(kpi_list):
     # Vi vill ha värden i stigande årtalsordning
     yearly_means.reverse()
     return yearly_means
-
-
-def _calculate_mean_for_year(year):
-    # Första kolumnen innehåller året, så den tar vi bort när vi räknar på medelvärdet
-    # Jag använder mig av list comprehension för att göra om värden till float innan
-    # beräkning av medelvärdet
-    return sum([float(value) for value in year[1:]]) / (len(year) - 1)
-
-
-# Hjälpfunktion för att hämta KPI för en månad
-def get_kpis_for_month(month):
-    values = _get_values_for_month(month)
-    # Vi vill ha värden i stigande årtalsordning
-    values.reverse()
-    return values
 
 
 # Hjälpfunktion för att hämta ut värden för en specifik månad
@@ -80,6 +74,14 @@ def _get_values_for_month(month):
         else:
             month_values.append(None)
     return month_values
+
+
+# Hjälpfunktion för att hämta KPI för en månad
+def get_kpis_for_month(month):
+    values = _get_values_for_month(month)
+    # Vi vill ha värden i stigande årtalsordning
+    values.reverse()
+    return values
 
 
 # Hjälpfunktion för att hämta alla år från filen
@@ -135,22 +137,21 @@ plot_kpi_for_month()
 def plot_data(list_of_data):
     # Statisk lista med färger att sätta i grafen
     colors = ["red", "green", "blue", "black", "yellow", "orange", "brown", "magenta"]
-    # Skippar första kolumnen som inte innehåller något år
-    # Måste göra om strängar till int
+    # Gör om strängar till en lista av int och skippar första kolumnen
     years = [int(year) for year in list_of_data[0][1:]]
     # Om första kolumnen i andra raden innehåller ordet "livsmedel" så är det tjänster
     if "livsmedel" in list_of_data[1][0]:
         plt.ylim([100, 1000])
         plt.title(
-            f"Prisutveckling for olika kategorier av varor och tjänster \
-                 År {years[0]}-{years[len(years)-1]}"
+            f"Prisutveckling for olika kategorier av varor och tjänster "
+            f"År {years[0]}-{years[len(years)-1]}"
         )
     else:
         plt.ylim([100, 500])
         plt.title(
-            f"Prisutveckling for olika livsmedel År \
-                {years[0]}-{years[len(years)-1]}"
+            f"Prisutveckling for olika livsmedel År {years[0]}-{years[len(years)-1]}"
         )
+    # Variabeln är till för att välja färg ur listan med färger
     i = 0
     for row in list_of_data[1:]:
         # Sätter x-limit till första och sista året i listan
@@ -251,8 +252,9 @@ print_prices_over_time_and_plot()
 # Uppgift 5
 
 # Hjälpmetod för att beräkna kpi-skillnader mellan månader
-def _get_KPI_diff_for_months(month1, month2):
-    return (month1 - month2) / month2
+def _get_KPI_diff_for_months_in_percent(month1, month2):
+    # Vi vill returnera i procent
+    return ((month1 - month2) / month2) * 100
 
 
 # Hjälpmetod för att beräkna kpi-skillnader för ett givet år
@@ -265,7 +267,7 @@ def _get_biggest_KPI_diff_and_index_for_year(yearly_kpis):
             i += 1
             continue
         # Vi skickar in förra värdet för att beräkna mot månadens värde
-        kpi_diff = _get_KPI_diff_for_months(float(kpi), float(yearly_kpis[i - 1]))
+        kpi_diff = _get_KPI_diff_for_months_in_percent(float(kpi), float(yearly_kpis[i - 1]))
         # Vi sparar skillnaden som absolut värde för att kunna beräkna största skillnaden
         kpi_diffs.append(kpi_diff)
         i += 1
@@ -289,8 +291,10 @@ def get_yearly_kpi_diffs():
     biggest_diff_all_time = 0
     biggest_diff_year = ""
     biggest_diff_month = ""
-    # Vi vill beräkna från 2000 - 2022
+    # Vi vill beräkna från 2000 - 2022, men måste ta med december 1999
     kpi_data_reversed = kpiData[1:24]
+    # Decembervärdet för 1999
+    dec_value = kpiData[24:25][0][12]
     # Och vi vill räkna bakifrån så vänder på listan
     kpi_data_reversed.reverse()
     # Vi återanvänder metoden för att räkna ut yearly means
@@ -445,17 +449,14 @@ def run_main_program():
         except ValueError:
             continue
         if selected_menu_item == 1:
-            file_kpi = (
-                input("Ange filnamn för KPI-filen (data/kpi-1.csv): ")
-                or "data/kpi-1.csv"
-            )
+            file_kpi = input("Ange filnamn för KPI-filen (kpi-1.csv): ") or "kpi-1.csv"
             file_livsmedel = (
-                input("Ange filnamn för livsmedel-filen (data/livsmedel-1.csv): ")
-                or "data/livsmedel-1.csv"
+                input("Ange filnamn för livsmedel-filen (livsmedel-1.csv): ")
+                or "livsmedel-1.csv"
             )
             file_tjanstedata = (
-                input("Ange filnamn för tjänstedata-filen (data/tjänster-1.csv): ")
-                or "data/tjänster-1.csv"
+                input("Ange filnamn för tjänstedata-filen (tjänster-1.csv): ")
+                or "tjänster-1.csv"
             )
             read_data_files(file_kpi, file_livsmedel, file_tjanstedata)
         if selected_menu_item == 2:
