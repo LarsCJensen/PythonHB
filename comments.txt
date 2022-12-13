@@ -1,0 +1,35 @@
+Uppgift 1: 
+Ett par onödiga kommentarer kanske
+Print av data kunde gjorts enklare (och skulle kanske även vara fler än en data-rad + rubriker) än att göra en loop.
+
+Uppgift 2:
+month_list-funktionen är lite förvirrande pga att listan inte endast innehåller månader utan även en kolumn för år. Den har dessutom en bugg. Om man väljer en månad som inte finns för 2022 så kommer den att returnera julis värde.
+Plottningen har med 2023 eftersom xlim har plot_list_year[0](2022) + 1.
+Funktionsnamnet borde vara mer tydligt än task2
+month_name och month_name_short behövs egentligen inte eftersom dessa rubriker finns i filerna.
+
+Mindre saker:
+En camelCase-variabel har smugit sig in
+task2 behöver inte ha en return eftersom den är void
+Det kan upplevas förvirrande att första elementet i listan hoppas över utan någon kommentar och att variabelnamnen endast är y, m.
+En förbättring skulle kunna vara att kolla input från användaren eftersom programmet kraschar om man skriver in något annat än 1-12.
+
+Uppgift 3:
+Det saknas kommentarer som förklarar lite mer varför man ibland börjar på index=1 och ibland på index=0. 
+Skulle även föredra om inte convertListToFloat kördes på samma rad som plot. Svårare att hänga med.
+return behövs inte här heller.
+
+Uppgift 4:
+price_change har kommentarer som inte är korrekta, det är prisskillnad mellan första och sista månad som beräknas
+Med hjälp av variabler med tydliga namn vore det lättare att förstå vad som beräknas och vad som returneras
+price_development_table och price_development_bar har båda onödig return
+
+Uppgift 5:
+Tyvärr missades dec 99 och jan 2000-jämförelsen, men det är lätt hänt.
+checkMaxKPIYear: i blir aldrig 0 eftersom range går från 1 till längden på listan med kpi-värden
+checkMaxKPIYear: maxTal borde vara 0 och inte False
+checkMaxKPIYear: Oklart varför kontroll av om värdet inte är 0.0. Det räcker med att kontrollera om värdet är större än 0, men det finns ju inga 0-värden i filerna.
+checkMaxKPIYear: Uträkningen av maxKPI är korrekt, men på grund av att månad och KPI inte har samma index blir månaden fel. month borde vara satt till i-1
+
+Uppgift 6:
+Förutom att koden inte hade behövt vara duplicerad fungerade det alldeles utmärkt (om man använder 1-6)
