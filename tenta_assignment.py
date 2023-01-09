@@ -19,7 +19,6 @@ def volymKon(r, h):
 
 # Uppgift 1b
 import random
-import copy
 
 # Hjälpmetod för att generera lista med ett visst antal element
 def generate_list(num_elements):
@@ -180,11 +179,137 @@ def Sort(lista, N):
     return lista
 
 
-listan = [5, 45, -4, 101, 78, 188, 97, -104, 47]
-print(f"Listan som ska sorteras är {listan} \n")
-N = len(listan)
-sorteradLista = Sort(listan, N)
-print(f"Den sorterade listan är {sorteradLista}")
+# listan = [5, 45, -4, 101, 78, 188, 97, -104, 47]
+# print(f"Listan som ska sorteras är {listan} \n")
+# N = len(listan)
+# sorteradLista = Sort(listan, N)
+# print(f"Den sorterade listan är {sorteradLista}")
 
 
-# Assignment 3
+# Assignment 3a
+import csv
+
+
+data_list = []
+
+
+def read_file():
+    # Använder with så att filen stängs automatiskt när man lämnar scopet av with
+    with open("inkomster.csv", "r", encoding="UTF-8") as file:
+        csv_reader = csv.reader(file, delimiter=",")
+        # Lägger till varje rad till listan
+        for line in csv_reader:
+            data_list.append(line)
+
+
+read_file()
+# Printa de tre första raderna på var sin rad.
+[print(data) for data in data_list[:3]]
+
+# Assignment 3b
+import matplotlib.pyplot as plt
+
+
+def plot_income_for_gender():
+    # Hämta ut alla år från data_list, men vill undvika att hämta dubbelt så
+    # tar endast för kolumn med värde män
+    years = [data[1] for data in data_list[1:] if data[0] == "män"]
+    # Hämtar ut alla inkomster för män och konverterar till float
+    income_men = [float(data[2]) for data in data_list[1:] if data[0] == "män"]
+    # Hämtar ut alla inkomster för kvinnor och konverterar till float
+    income_women = [float(data[2]) for data in data_list[1:] if data[0] == "kvinnor"]
+
+    # Sätt storleken på plotytan
+    fig, ax = plt.subplots(figsize=(16, 9))
+
+    plt.plot(years, income_women, color="black", label="Kvinnor")
+    plt.plot(years, income_men, color="pink", label="Män")
+    plt.bar(years, income_men, label="Män")
+    plt.bar(years, income_women, label="Kvinnor")
+
+    plt.title("Sammanräknad inkomst efter kön och ålder 2020")
+    plt.xticks(rotation=90)
+    plt.xlabel("Ålder")
+    plt.ylabel("Inkomst")
+    # Här sätter jag startvärden för x- och y-axeln
+    plt.xlim([years[0], years[len(years) - 1]])
+    plt.ylim([0, 500])
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
+# plot_income_for_gender()
+
+# Assignment 3c
+# Hjälpfunktion för att hämta minimum inkomst (visste inte om man fick använda min)
+def _get_min_income(income_list):
+    min_income = 0
+    for income in income_list:
+        # Första körning så sätter vi min_income till värdet
+        if income == 0:
+            min_income = income
+        else:
+            # Om income är mindre än hittills minsta income används den
+            if income < min_income:
+                min_income = income
+    return min_income
+
+
+# Hjälpmetod för att hämta max-värdet (visste inte om man fick använda max)
+def _get_max_income(income_list):
+    max_income = 0
+    for income in income_list:
+        # Första körning så sätter vi max_income till värdet
+        if income == 0:
+            max_income = income
+        else:
+            # Om income är större än hittills högsta income används den
+            if income > max_income:
+                max_income = income
+    return max_income
+
+
+def _get_mean_income(income_list):
+    return round(sum(income_list) / len(income_list), 2)
+
+
+def _get_median_income(income_list):
+    if len(income_list) % 2 == 1:
+        return income_list[len(income_list) // 2]
+    else:
+        i = n // 2
+        return (data[i - 1] + data[i]) / 2
+    return income_list[len(income_list) / 2]
+
+
+def print_table_with_income():
+    # Hämtar ut alla inkomster för män och konverterar till float
+    income_men = [float(data[2]) for data in data_list[1:] if data[0] == "män"]
+    # Hämtar ut alla inkomster för kvinnor och konverterar till float
+    income_women = [float(data[2]) for data in data_list[1:] if data[0] == "kvinnor"]
+    min_income_men = _get_min_income(income_men)
+    min_income_women = _get_min_income(income_women)
+    max_income_men = _get_max_income(income_men)
+    max_income_women = _get_max_income(income_women)
+    mean_income_men = _get_mean_income(income_men)
+    mean_income_women = _get_mean_income(income_women)
+    median_income_men = _get_median_income(income_men)
+    median_income_women = _get_median_income(income_women)
+
+    header1 = "Mininkomst"
+    header2 = "Maxinkomst"
+    header3 = "Medelinkomst"
+    header4 = "Medianinkomst"
+    man_string = "Män"
+    woman_string = "Kvinnor"
+    print(f"{header1:>21}{header2:>14}{header3:>14}{header4:>14}")
+    print("---------|-------------|-----------|-------------|----------")
+    print(
+        f"{man_string:10}|{min_income_men:10}|{max_income_men:10}|{mean_income_men:10}|{median_income_men:10}"
+    )
+    print("---------|-------------|-----------|-------------|----------")
+    print(f"{woman_string:10}")
+
+
+print_table_with_income()
