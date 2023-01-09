@@ -36,9 +36,16 @@ def generate_list(num_elements):
 def find_values():
     values_to_find = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
     list_of_numbers = generate_list(4)
-    # Jag kopierar den randomiserade listan för att kunna göra ändringar utan att
-    # ändra i den "riktiga" listan
-    modified_list = copy.deepcopy(list_of_numbers)
+    # Jag sparar utskriftsströngen av listan eftersom jag inte listade ut hur jag
+    # skulle göra en kopia av den ursprungliga listan (så att den inte ändrar sig)
+    # utan att använda deepcopy. Jag hade föredragit att använda copy, men det
+    # fick man inte.
+    # modified_list = copy.deepcopy(list_of_numbers)
+    list_print = f"Den slumpmässigt skapade listan är: {list_of_numbers}"
+    modified_list = []
+    # Skapar en kopia av list_numbers_listan, men värden blir ändå som ref i detta fall
+    for item in list_of_numbers:
+        modified_list.append(item)
     print("Talen som vi har hittat är:")
     # Loopa över listans rader
     for i in range(len(list_of_numbers)):
@@ -53,7 +60,7 @@ def find_values():
                 # och låter loopen fortsätta
                 continue
 
-    print(f"Den slumpmässigt skapade listan är: {list_of_numbers}")
+    print(list_print)
     print(f"Den modifierade lista är: {modified_list}")
 
 
@@ -178,3 +185,6 @@ print(f"Listan som ska sorteras är {listan} \n")
 N = len(listan)
 sorteradLista = Sort(listan, N)
 print(f"Den sorterade listan är {sorteradLista}")
+
+
+# Assignment 3
