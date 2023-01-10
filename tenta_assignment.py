@@ -14,8 +14,17 @@ def volymKon(r, h):
     return (bas * h) / 3
 
 
+while True:
+    radie = input("För vilken radie ska volymen beräknas?")
+    try:
+        # För att säkerställa att användaren angivit korrekt int
+        val = int(radie)
+        break
+    except:
+        # Annars ombeds användaren att försöka igen
+        print("Felaktigt tal! Försök igen.")
 # Jag avrundar talet till 1 decimal innan jag printar det
-# print(f"Volymen är {round(volymKon(3, 6), 1)}")
+print(f"Volymen är {round(volymKon(val, 6), 1)}")
 
 # Uppgift 1b
 import random
@@ -63,7 +72,7 @@ def find_values():
     print(f"Den modifierade lista är: {modified_list}")
 
 
-# find_values()
+find_values()
 
 
 # Uppgift 2a
@@ -96,7 +105,7 @@ def singlaslant():
     print(f"Utfallet blev {krona} Krona och {klave} Klave.")
 
 
-# singlaslant()
+singlaslant()
 
 # Uppgift 2b
 
@@ -160,7 +169,7 @@ def generate_user():
     print(f"Ditt användarnamn är {username} och ditt lösenord är {pw}")
 
 
-# generate_user()
+generate_user()
 
 # Assignment 2c
 def Sort(lista, N):
@@ -179,32 +188,34 @@ def Sort(lista, N):
     return lista
 
 
-# listan = [5, 45, -4, 101, 78, 188, 97, -104, 47]
-# print(f"Listan som ska sorteras är {listan} \n")
-# N = len(listan)
-# sorteradLista = Sort(listan, N)
-# print(f"Den sorterade listan är {sorteradLista}")
+listan = [5, 45, -4, 101, 78, 188, 97, -104, 47]
+print(f"Listan som ska sorteras är {listan} \n")
+N = len(listan)
+sorteradLista = Sort(listan, N)
+print(f"Den sorterade listan är {sorteradLista}")
 
 
 # Assignment 3a
 import csv
 
 
-data_list = []
+income_list = []
 
 
-def read_file():
+def read_file(file_name):
+    data_list = []
     # Använder with så att filen stängs automatiskt när man lämnar scopet av with
-    with open("inkomster.csv", "r", encoding="UTF-8") as file:
+    with open(file_name, "r", encoding="UTF-8") as file:
         csv_reader = csv.reader(file, delimiter=",")
         # Lägger till varje rad till listan
         for line in csv_reader:
             data_list.append(line)
+    return data_list
 
 
-read_file()
+income_list = read_file("inkomster.csv")
 # Printa de tre första raderna på var sin rad.
-[print(data) for data in data_list[:3]]
+[print(data) for data in income_list[:3]]
 
 # Assignment 3b
 import matplotlib.pyplot as plt
@@ -213,11 +224,11 @@ import matplotlib.pyplot as plt
 def plot_income_for_gender():
     # Hämta ut alla år från data_list, men vill undvika att hämta dubbelt så
     # tar endast för kolumn med värde män
-    years = [data[1] for data in data_list[1:] if data[0] == "män"]
+    years = [data[1] for data in income_list[1:] if data[0] == "män"]
     # Hämtar ut alla inkomster för män och konverterar till float
-    income_men = [float(data[2]) for data in data_list[1:] if data[0] == "män"]
+    income_men = [float(data[2]) for data in income_list[1:] if data[0] == "män"]
     # Hämtar ut alla inkomster för kvinnor och konverterar till float
-    income_women = [float(data[2]) for data in data_list[1:] if data[0] == "kvinnor"]
+    income_women = [float(data[2]) for data in income_list[1:] if data[0] == "kvinnor"]
 
     # Sätt storleken på plotytan
     fig, ax = plt.subplots(figsize=(16, 9))
@@ -239,55 +250,43 @@ def plot_income_for_gender():
     plt.show()
 
 
-# plot_income_for_gender()
+plot_income_for_gender()
 
 # Assignment 3c
-# Hjälpfunktion för att hämta minimum inkomst (visste inte om man fick använda min)
+# Hjälpfunktion för att hämta minimum inkomst
 def _get_min_income(income_list):
-    min_income = 0
-    for income in income_list:
-        # Första körning så sätter vi min_income till värdet
-        if income == 0:
-            min_income = income
-        else:
-            # Om income är mindre än hittills minsta income används den
-            if income < min_income:
-                min_income = income
-    return min_income
+    return min(income_list)
 
 
-# Hjälpmetod för att hämta max-värdet (visste inte om man fick använda max)
+# Hjälpmetod för att hämta max-värdet
 def _get_max_income(income_list):
-    max_income = 0
-    for income in income_list:
-        # Första körning så sätter vi max_income till värdet
-        if income == 0:
-            max_income = income
-        else:
-            # Om income är större än hittills högsta income används den
-            if income > max_income:
-                max_income = income
-    return max_income
+    return max(income_list)
 
 
+# Hjälpmetod för att hämta medelvärdet
 def _get_mean_income(income_list):
     return round(sum(income_list) / len(income_list), 2)
 
 
+# Hjälpmetod för att hämta medianvärdet
 def _get_median_income(income_list):
-    if len(income_list) % 2 == 1:
-        return income_list[len(income_list) // 2]
+    # Sortera värden i storleksordning
+    sorted_list = sorted(income_list)
+    # Om listan går att dela med 1 som rest tar vi det mittersta värdet
+    if len(sorted_list) % 2 == 1:
+        return sorted_list[len(sorted_list) // 2]
     else:
-        i = n // 2
-        return (data[i - 1] + data[i]) / 2
-    return income_list[len(income_list) / 2]
+        i = len(sorted_list) // 2
+        # Annars returnerar vi medelvärdet av de två mittersta värden
+        return (sorted_list[i - 1] + sorted_list[i]) / 2
 
 
 def print_table_with_income():
     # Hämtar ut alla inkomster för män och konverterar till float
-    income_men = [float(data[2]) for data in data_list[1:] if data[0] == "män"]
+    income_men = [float(data[2]) for data in income_list[1:] if data[0] == "män"]
     # Hämtar ut alla inkomster för kvinnor och konverterar till float
-    income_women = [float(data[2]) for data in data_list[1:] if data[0] == "kvinnor"]
+    income_women = [float(data[2]) for data in income_list[1:] if data[0] == "kvinnor"]
+    # Här tar vi fram alla beräkande värden
     min_income_men = _get_min_income(income_men)
     min_income_women = _get_min_income(income_women)
     max_income_men = _get_max_income(income_men)
@@ -303,13 +302,153 @@ def print_table_with_income():
     header4 = "Medianinkomst"
     man_string = "Män"
     woman_string = "Kvinnor"
+    # Justera headers så de blir korrekt utplacerade
     print(f"{header1:>21}{header2:>14}{header3:>14}{header4:>14}")
     print("---------|-------------|-----------|-------------|----------")
     print(
-        f"{man_string:10}|{min_income_men:10}|{max_income_men:10}|{mean_income_men:10}|{median_income_men:10}"
+        f"{man_string:9}|{min_income_men:<13}|{max_income_men:<11}|{mean_income_men:<13}|{median_income_men:<9}"
     )
     print("---------|-------------|-----------|-------------|----------")
-    print(f"{woman_string:10}")
+    print(
+        f"{woman_string:9}|{min_income_women:<13}|{max_income_women:<11}|{mean_income_women:<13}|{median_income_women:<9}"
+    )
 
 
 print_table_with_income()
+
+# Assignment 3d
+inkomsterKommunerData = read_file("inkomsterKommuner.csv")
+# Printa de tre första raderna på var sin rad.
+[print(data) for data in inkomsterKommunerData[:3]]
+
+# Hjälpfunktion för att hitta fattigaste kommunen
+def _get_poorest_municipality(income_list):
+    min_income = 0
+    min_income_name = ""
+    for income in income_list:
+        # Första körning så sätter vi min_income, min_income_name till första värdet
+        if min_income == 0:
+            min_income = income[1]
+            min_income_name = income[0]
+        else:
+            # Om income är mindre än hittills minsta income används den
+            if income[1] < min_income:
+                min_income = income[1]
+                min_income_name = income[0]
+    return min_income, min_income_name
+
+
+# Hjälpfunktion för att hitta rikaste kommunen
+def _get_richest_municipality(income_list):
+    max_income = 0
+    max_income_name = ""
+    for income in income_list:
+        # Första körning så sätter vi max_income, max_income_name till första värdet
+        if max_income == 0:
+            max_income = income[1]
+            max_income_name = income[0]
+        else:
+            # Om income är strörre än hittills största income används den
+            if income[1] > max_income:
+                max_income = income[1]
+                max_income_name = income[0]
+    return max_income, max_income_name
+
+
+# Hjälpmetod för att räkna ut medelvärde
+def _get_mean_value_for_sweden(income_list, with_counties=False):
+
+    list_without_riket = [income for income in income_list if "Riket" not in income[0]]
+    mean_value = 0
+    # Jag la till möjlighet att välja om man ska ta med län eller ej
+    if with_counties:
+        # Om inte rader med "LÄN" ska tas bort så summerar vi inkomst och delar med
+        # listans längd
+        mean_value = sum([int(income[1]) for income in list_without_riket]) / len(
+            list_without_riket
+        )
+    else:
+        # Här vill vi inte ha med rader med "LÄN"
+        list_with_only_municipalities = [
+            income for income in list_without_riket if "LÄN" not in income[0]
+        ]
+        mean_value = sum(
+            [int(income[1]) for income in list_with_only_municipalities]
+        ) / len(list_with_only_municipalities)
+    return round(mean_value)
+
+
+# Hjälpmetod för att hämta värde för en viss kommun
+def _get_value_for_selected(income_list, municipality):
+    # Hitta raden med värde `municipality` och konvertera värdet till int och returnera
+    # första (och ända) värdet i listan
+    return [int(income[1]) for income in income_list if income[0] == municipality][0]
+
+
+def print_municipality_income(income_list):    
+    poorest_value, poorest_name = _get_poorest_municipality(income_list)
+    richest_value, richest_name = _get_richest_municipality(income_list)
+    mean_value = _get_mean_value_for_sweden(
+        income_list=income_list, with_counties=False
+    )
+    mean_name = "Sverige"
+    selected_municipality = "Borås"
+    selected_value = _get_value_for_selected(income_list, selected_municipality)
+    header1 = "Typ"
+    header2 = "Namn"
+    header3 = "Inkomster"
+
+    category1 = "Fattigaste"
+    category2 = "Rikaste"
+    category3 = "Medel"
+    category4 = "Vald kommun"
+
+    print("-----------------|--------------|-----------")
+    print(f"{header1:<17}|{header2:<14}|{header3:<10}")
+    print("-----------------|--------------|-----------")
+    # Skriv ut värden, konverterar värden till sträng och konkatenera med 'Kr'
+    print(f"{category1:<17}|{poorest_name:<14}|{str(poorest_value) + 'Kr':<10}")
+    print("-----------------|--------------|-----------")
+    print(f"{category2:<17}|{richest_name:<14}|{str(richest_value) + 'Kr':<10}")
+    print("-----------------|--------------|-----------")
+    print(f"{category3:<17}|{mean_name:<14}|{str(mean_value) + 'Kr':<10}")
+    print("-----------------|--------------|-----------")
+    print(
+        f"{category4:<17}|{selected_municipality:<14}|{str(selected_value) + 'Kr':<10}"
+    )
+    print("-----------------|--------------|-----------")
+
+    # Sätt storleken på plotytan
+    fig, ax = plt.subplots(figsize=(16, 9))
+
+    plt.bar(
+        "Fattigaste kommun",
+        int(poorest_value),
+        label="Fattigaste kommun",
+    )
+    plt.bar(
+        "Rikaste kommun",
+        int(richest_value),
+        label="Rikaste kommun",
+    )
+    plt.bar(
+        "Medelinkomst i Sverige",
+        int(mean_value),
+        label="Medelinkomst i Sverige",
+    )
+    plt.bar(
+        f"{selected_municipality} kommun",
+        int(selected_value),
+        label=f"{selected_municipality} kommun",
+    )
+    # plt.bar(years, income_women, label="Kvinnor")
+
+    plt.title("Inkomster")
+    plt.xlabel("Plats")
+    plt.ylabel("Inkomster")
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
+print_municipality_income(inkomsterKommunerData)
